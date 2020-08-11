@@ -69,6 +69,7 @@
             "editor": "javascript",
             "description": "A function which result will get merged with the default result. It must return an object.",
             "example": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
+            "default": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
             "sectionCaption": "Advanced options"
         }
     },
