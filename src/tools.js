@@ -42,14 +42,16 @@ exports.getPlaceIdFromUrl = (urlString) => {
 exports.initRequestQueue = async ({ startUrls, searchQuery, units, timeFrame }) => {
     // get all relevant place ids
     const startPlaceIds = startUrls.map((urlObject) => this.getPlaceIdFromUrl(urlObject.url));
-    const foundPlaces = await this.getPlacesByQuery(searchQuery);
+
+    // if search query is provided, search for places
+    const foundPlaces = searchQuery ? await this.getPlacesByQuery(searchQuery) : [];
     const foundPlaceIds = foundPlaces.map((place) => place.placeId);
     const placeIds = [...startPlaceIds, ...foundPlaceIds];
 
     const requestQueue = await Apify.openRequestQueue();
 
     // select the correct locale for specified units
-    const locale = units === 'C' ? 'en-UK' : 'en-US';
+    const locale = units === 'C' ? 'en-GB' : 'en-US';
 
     // put all their urls to queue
     for (let i = 0; i < placeIds.length; i++) {
