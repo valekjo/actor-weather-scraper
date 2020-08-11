@@ -1,0 +1,76 @@
+{
+    "title": "weather-scraper",
+    "description": "",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "startUrls": {
+            "title": "Start urls",
+            "description": "",
+            "default": [
+                {
+                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
+                }
+            ],
+            "prefill": [
+                {
+                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
+                }
+            ],
+            "example": [
+                {
+                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
+                }
+            ],
+            "type": "array",
+            "uniqueItems": true,
+            "editor": "requestListSources"
+        },
+        "units": {
+            "title": "Units",
+            "type": "string",
+            "description": "Select units",
+            "editor": "select",
+            "default": "C",
+            "enum": ["F", "C"],
+            "enumTitles": ["Fahrenheit", "Celsius"]
+        },
+        "timeFrame": {
+            "title": "Time Frame",
+            "type": "string",
+            "description": "Select time frame",
+            "editor": "select",
+            "default": "today",
+            "enum": ["today"],
+            "enumTitles": ["Today"]
+        },
+        "maxItems": {
+            "title": "Max items",
+            "type": "integer",
+            "minimum": 0,
+            "description": "Limit of product items to be scraped. Zero value means no limit.",
+            "prefill": 0
+        },
+        "proxyConfiguration": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "description": "Select proxies to be used by your actor.",
+            "example": {
+                "useApifyProxy": true
+            },
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
+        },
+        "extendOutputFunction": {
+            "title": "Extend output function",
+            "type": "string",
+            "editor": "javascript",
+            "description": "A function which result will get merged with the default result. It must return an object.",
+            "example": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
+            "sectionCaption": "Advanced options"
+        }
+    },
+    "required": ["startUrls", "proxyConfiguration", "extendOutputFunction"]
+}

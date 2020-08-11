@@ -1,0 +1,7 @@
+{
+    "extends": ["@apify"],
+    "plugins": ["jest"],
+    "env": {
+        "jest/globals": true
+    }
+}

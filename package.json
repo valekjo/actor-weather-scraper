@@ -1,0 +1,22 @@
+{
+	"name": "actor-weather-scraper",
+	"version": "0.0.1",
+	"description": "This is an example of an Apify actor.",
+	"dependencies": {
+		"apify": "^0.21.0"
+	},
+	"devDependencies": {
+		"@apify/eslint-config": "^0.1.0",
+		"eslint": "^7.6.0",
+		"eslint-plugin-jest": "^23.20.0",
+		"jest": "^26.3.0"
+	},
+	"scripts": {
+		"start": "node src/main.js",
+		"lint": "eslint ./src --ext .js,.jsx",
+		"lint:fix": "eslint ./src --ext .js,.jsx --fix",
+		"test": "jest"
+	},
+	"author": "It's not you it's me",
+	"license": "ISC"
+}
