@@ -24,3 +24,15 @@ exports.objectOfArraysToArrayOfObjects = (data) => {
 exports.getTestIdHierarchySelector = (testIds) => {
     return testIds.map((testId) => `[data-testid="${testId}"]`).join(' ');
 };
+
+exports.isObject = (o) => {
+    return o !== null && typeof o === 'object' && Array.isArray(o) === false;
+};
+
+function normalizeZipCode(zipCode) {
+    return zipCode.replace(/[^0-9]/g, '');
+}
+
+exports.zipCodeEquals = (a, b) => {
+    return normalizeZipCode(a) === normalizeZipCode(b);
+};

@@ -2,7 +2,7 @@ const Apify = require('apify');
 const helpers = require('./helpers');
 
 const {
-    utils: { log, requestAsBrowser },
+    utils: { requestAsBrowser },
 } = Apify;
 
 /**
@@ -39,23 +39,47 @@ exports.getPlaceIdFromUrl = (urlString) => {
  * @return {Apify.RequestQueue}
  *
  */
-exports.initRequestQueue = async ({ startUrls, searchQuery, units, timeFrame }) => {
-    // get all relevant place ids
+exports.initRequestQueue = async ({
+    startUrls,
+    cities,
+    zipCodes,
+    units,
+    timeFrame,
+}) => {
+    // parse place ids from start urls
     const startPlaceIds = startUrls.map((urlObject) => this.getPlaceIdFromUrl(urlObject.url));
 
-    // if search query is provided, search for places
-    const foundPlaces = searchQuery ? await this.getPlacesByQuery(searchQuery) : [];
-    const foundPlaceIds = foundPlaces.map((place) => place.placeId);
-    const placeIds = [...startPlaceIds, ...foundPlaceIds];
+    // search for places
+    const foundCities = await getCities(cities);
+    const foundCityPlaceIds = foundCities.map((place) => place.placeId);
 
+    // search for zip codes
+    const foundZipCodes = await getZipCodes(zipCodes);
+    const foundZipCodePlaceIds = foundZipCodes.map((place) => place.placeId);
+
+    await Apify.setValue('cities', foundCities);
+    await Apify.setValue('zipCodes', foundZipCodes);
+
+    // combine all results
+    const placeIds = [
+        ...startPlaceIds,
+        ...foundCityPlaceIds,
+        ...foundZipCodePlaceIds,
+    ];
+
+    // create request queue
     const requestQueue = await Apify.openRequestQueue();
 
-    // select the correct locale for specified units
-    const locale = units === 'C' ? 'en-GB' : 'en-US';
+    // determine which locale to use based on desired units
+    const locale = units === 'METRIC' ? 'en-GB' : 'en-US';
 
-    // put all their urls to queue
+    // put all urls to queue
     for (let i = 0; i < placeIds.length; i++) {
-        const options = constructWeatherRequestOptions(placeIds[i], timeFrame, locale);
+        const options = constructWeatherRequestOptions(
+            placeIds[i],
+            timeFrame,
+            locale,
+        );
         await requestQueue.addRequest(options);
     }
 
@@ -67,7 +91,7 @@ exports.initRequestQueue = async ({ startUrls, searchQuery, units, timeFrame }) 
  * @param {string} query
  * @returns {Array<object>} Array of relevant places
  */
-exports.getPlacesByQuery = async (query) => {
+async function getPlacesBySearchQuery(query) {
     // todo - add error handling
     const response = await requestAsBrowser({
         url: 'https://weather.com/api/v1/p/redux-dal',
@@ -94,4 +118,55 @@ exports.getPlacesByQuery = async (query) => {
     const places = helpers.objectOfArraysToArrayOfObjects(locationsTable);
 
     return places;
-};
+}
+
+/**
+ *
+ * @param {Array<string>} names
+ * @return {Array<object>}
+ */
+async function getCities(names) {
+    const createFilter = (name) => {
+        return (place) => {
+            return place.city.toLowerCase().includes(name.trim().toLowerCase());
+        };
+    };
+    const result = await getFilteredPlaces(names, createFilter);
+    return result;
+}
+
+/**
+ *
+ * @param {Array<string>} codes
+ * @return {Array<object>}
+ */
+async function getZipCodes(codes) {
+    const createFilter = (code) => {
+        return (place) => {
+            return helpers.zipCodeEquals(code, place.postalCode);
+        };
+    };
+    const result = await getFilteredPlaces(codes, createFilter);
+    return result;
+}
+
+/**
+ *
+ * @param {Array<string>} searchQueries
+ * @param {string => (any, any) => bool} getFilter
+ * @return {Array<object>}
+ */
+async function getFilteredPlaces(searchQueries, creteFilterForQuery) {
+    // run all results through map to get rid of duplicities
+    const result = new Map();
+    for (let i = 0; i < searchQueries.length; i++) {
+        const query = searchQueries[i];
+        const places = await getPlacesBySearchQuery(query);
+        const filter = creteFilterForQuery(query);
+        // filter places and append them to result
+        places.filter(filter).forEach((place) => {
+            result.set(place.placeId, place);
+        });
+    }
+    return Array.from(result.values());
+}

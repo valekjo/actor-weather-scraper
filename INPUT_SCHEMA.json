@@ -26,14 +26,28 @@
             "uniqueItems": true,
             "editor": "requestListSources"
         },
+        "cities": {
+            "title": "Search City",
+            "type": "array",
+            "description": "Enter cities you want to scrape",
+            "prefill": [],
+            "editor": "stringList"
+        },
+        "zipCodes": {
+            "title": "Search City",
+            "type": "array",
+            "description": "Enter cities you want to scrape",
+            "prefill": [],
+            "editor": "stringList"
+        },
         "units": {
             "title": "Units",
             "type": "string",
             "description": "Select units",
             "editor": "select",
-            "default": "C",
-            "enum": ["F", "C"],
-            "enumTitles": ["Fahrenheit", "Celsius"]
+            "default": "METRIC",
+            "enum": ["IMPERIAL", "METRIC"],
+            "enumTitles": ["Imperial (F)", "Metric (C)"]
         },
         "timeFrame": {
             "title": "Time Frame",
