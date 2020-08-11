@@ -7,11 +7,6 @@
         "startUrls": {
             "title": "Start urls",
             "description": "",
-            "default": [
-                {
-                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
-                }
-            ],
             "prefill": [
                 {
                     "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
@@ -31,6 +26,7 @@
             "type": "array",
             "description": "Enter cities you want to scrape",
             "prefill": [],
+            "default": [],
             "editor": "stringList"
         },
         "zipCodes": {
@@ -38,6 +34,7 @@
             "type": "array",
             "description": "Enter zpi codes you want to scrape",
             "prefill": [],
+            "default": [],
             "editor": "stringList"
         },
         "units": {
@@ -45,7 +42,7 @@
             "type": "string",
             "description": "Select units",
             "editor": "select",
-            "default": "METRIC",
+            "prefill": "METRIC",
             "enum": ["IMPERIAL", "METRIC"],
             "enumTitles": ["Imperial (F)", "Metric (C)"]
         },
@@ -83,7 +80,8 @@
             "editor": "javascript",
             "description": "A function which result will get merged with the default result. It must return an object.",
             "example": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
-            "default": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
+            "default": "() => ({})",
+            "prefill": "() => ({})",
             "sectionCaption": "Advanced options"
         }
     },
