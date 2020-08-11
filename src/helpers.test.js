@@ -1,4 +1,4 @@
-const tools = require('./tools');
+const helpers = require('./helpers');
 
 test('location id is parsed properly', () => {
     const data = [
@@ -16,6 +16,17 @@ test('location id is parsed properly', () => {
         },
     ];
     data.forEach(({ url, locationId }) => {
-        expect(tools.getPlaceIdFromUrl(url)).toBe(locationId);
+        expect(helpers.getPlaceIdFromUrl(url)).toBe(locationId);
+    });
+});
+
+test('zip code equality', () => {
+    const data = [
+        [['12300', '123 00'], true],
+        [['12300', '123 00:FR'], true],
+        [['12300', '123 000'], false],
+    ];
+    data.forEach(([[a, b], result]) => {
+        expect(helpers.zipCodeEquals(a, b)).toBe(result);
     });
 });

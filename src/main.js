@@ -8,6 +8,33 @@ const {
     utils: { log },
 } = Apify;
 
+Apify.main(async () => {
+    const configuration = await config.getConfig();
+    const {
+        proxyConfiguration,
+        extendOutputFunction,
+        maxRequestsPerCrawl,
+    } = configuration;
+
+    const requestQueue = await tools.initRequestQueue(configuration);
+
+    const proxyConfig = await Apify.createProxyConfiguration(
+        proxyConfiguration,
+    );
+
+    log.debug('Setting up crawler.');
+    const crawler = new Apify.CheerioCrawler({
+        maxRequestsPerCrawl,
+        requestQueue,
+        handlePageFunction: createHandlePageFunction({ extendOutputFunction }),
+        proxyConfiguration: proxyConfig,
+    });
+
+    log.info('Starting the crawl.');
+    await crawler.run();
+    log.info('Actor finished.');
+});
+
 function createHandlePageFunction({ extendOutputFunction }) {
     return async ({ request, $, response, ...rest }) => {
         // omit all non 200 status code pages
@@ -43,31 +70,3 @@ function createHandlePageFunction({ extendOutputFunction }) {
         }
     };
 }
-
-Apify.main(async () => {
-    const configuration = await config.getConfig();
-    const {
-        proxyConfiguration,
-        extendOutputFunction,
-        maxRequestsPerCrawl,
-    } = configuration;
-
-    log.info('Preparing request queue');
-    const requestQueue = await tools.initRequestQueue(configuration);
-
-    const proxyConfig = await Apify.createProxyConfiguration(
-        proxyConfiguration,
-    );
-
-    log.debug('Setting up crawler.');
-    const crawler = new Apify.CheerioCrawler({
-        maxRequestsPerCrawl,
-        requestQueue,
-        handlePageFunction: createHandlePageFunction({ extendOutputFunction }),
-        proxyConfiguration: proxyConfig,
-    });
-
-    log.info('Starting the crawl.');
-    await crawler.run();
-    log.info('Actor finished.');
-});

@@ -34,9 +34,9 @@
             "editor": "stringList"
         },
         "zipCodes": {
-            "title": "Search City",
+            "title": "Search Zip Code",
             "type": "array",
-            "description": "Enter cities you want to scrape",
+            "description": "Enter zpi codes you want to scrape",
             "prefill": [],
             "editor": "stringList"
         },

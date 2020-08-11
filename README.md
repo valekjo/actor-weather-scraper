@@ -51,3 +51,13 @@ Algorithm:
 Switching between metric and imperial units happens through cookies - but the desired result can be achieved by accessing page with specific locale (but how about cookies? are the same cookies used all the time in the crawler?) - does not matter - whole crawl uses the same minutes.
 
 Zip code, state, etc. are not present in the page code. However, they can be obtained through page search (which is already used to search for places by name.) so we can use the same to obtain more details.
+
+
+### TODO
+
+ 1. input validation
+ 2. error handling
+ 3. specific page handlers
+ 4. tests
+ 5. output cleanup
+ 6. readme, license, etc

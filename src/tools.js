@@ -2,36 +2,26 @@ const Apify = require('apify');
 const helpers = require('./helpers');
 
 const {
-    utils: { requestAsBrowser },
+    utils: { log, requestAsBrowser },
 } = Apify;
 
 /**
  *
- * @param {string} placeId
+ * @param {object} place
  * @param {string} timeFrame
  * @param {string} locale
  * @return {Apify.RequestOptions}
  */
-function constructWeatherRequestOptions(placeId, timeFrame, locale) {
-    const url = `https://weather.com/${locale}/weather/${timeFrame}/l/${placeId}`;
+function createRequestOptions(place, timeFrame, locale) {
+    const url = `https://weather.com/${locale}/weather/${timeFrame}/l/${place.placeId}`;
     return {
         url,
         userData: {
             pageType: timeFrame,
+            place,
         },
     };
 }
-
-/**
- * Extract place id from url.
- *
- * @param {string} urlString
- */
-exports.getPlaceIdFromUrl = (urlString) => {
-    const url = new URL(urlString);
-    const placeId = url.pathname.split('/').pop();
-    return placeId;
-};
 
 /**
  *
@@ -46,26 +36,30 @@ exports.initRequestQueue = async ({
     units,
     timeFrame,
 }) => {
-    // parse place ids from start urls
-    const startPlaceIds = startUrls.map((urlObject) => this.getPlaceIdFromUrl(urlObject.url));
+    log.info('Initializing request queue.');
+
+    // convert startUrls to place-like objects (with only placeId present)
+    const startPlaces = startUrls.map((urlObject) => {
+        return { placeId: helpers.getPlaceIdFromUrl(urlObject.url) };
+    });
 
     // search for places
     const foundCities = await getCities(cities);
-    const foundCityPlaceIds = foundCities.map((place) => place.placeId);
 
     // search for zip codes
     const foundZipCodes = await getZipCodes(zipCodes);
-    const foundZipCodePlaceIds = foundZipCodes.map((place) => place.placeId);
 
     await Apify.setValue('cities', foundCities);
     await Apify.setValue('zipCodes', foundZipCodes);
 
     // combine all results
-    const placeIds = [
-        ...startPlaceIds,
-        ...foundCityPlaceIds,
-        ...foundZipCodePlaceIds,
+    const places = [
+        ...startPlaces,
+        ...foundCities,
+        ...foundZipCodes,
     ];
+
+    log.info(`Found ${places.length} places to crawl.`);
 
     // create request queue
     const requestQueue = await Apify.openRequestQueue();
@@ -73,15 +67,17 @@ exports.initRequestQueue = async ({
     // determine which locale to use based on desired units
     const locale = units === 'METRIC' ? 'en-GB' : 'en-US';
 
-    // put all urls to queue
-    for (let i = 0; i < placeIds.length; i++) {
-        const options = constructWeatherRequestOptions(
-            placeIds[i],
+    // put all places to request queue
+    for (let i = 0; i < places.length; i++) {
+        const options = createRequestOptions(
+            places[i],
             timeFrame,
             locale,
         );
         await requestQueue.addRequest(options);
     }
+
+    log.info('Request queue initialized.');
 
     return requestQueue;
 };
@@ -92,7 +88,7 @@ exports.initRequestQueue = async ({
  * @returns {Array<object>} Array of relevant places
  */
 async function getPlacesBySearchQuery(query) {
-    // todo - add error handling
+    log.info(`Searching for places using query: ${query}`);
     const response = await requestAsBrowser({
         url: 'https://weather.com/api/v1/p/redux-dal',
         method: 'POST',
@@ -109,9 +105,20 @@ async function getPlacesBySearchQuery(query) {
         ]),
     });
 
+    log.debug('Place search api response body', response.body);
+
+    if (!response.body.dal || !response.body.dal.getSunV3LocationSearchUrlConfig) {
+        throw new Error('Place search api returned unknown response');
+    }
+
     // locate the part of response containing needed data
     const data = response.body.dal.getSunV3LocationSearchUrlConfig;
     const key = Object.keys(data).pop();
+
+    if (!data[key] || !data[key].data || !data[key].data.location) {
+        throw new Error('Place search api returned unknown response.');
+    }
+
     const locationsTable = data[key].data.location;
 
     // convert to more readable form
@@ -121,6 +128,7 @@ async function getPlacesBySearchQuery(query) {
 }
 
 /**
+ * Search for places by city names.
  *
  * @param {Array<string>} names
  * @return {Array<object>}
@@ -136,6 +144,7 @@ async function getCities(names) {
 }
 
 /**
+ * Search for places by zip codes.
  *
  * @param {Array<string>} codes
  * @return {Array<object>}
@@ -151,9 +160,10 @@ async function getZipCodes(codes) {
 }
 
 /**
+ * Load places from search api, but only keep those satisfying given conditions.
  *
  * @param {Array<string>} searchQueries
- * @param {string => (any, any) => bool} getFilter
+ * @param {string => (any, any) => bool} createFilterForQuery
  * @return {Array<object>}
  */
 async function getFilteredPlaces(searchQueries, creteFilterForQuery) {
