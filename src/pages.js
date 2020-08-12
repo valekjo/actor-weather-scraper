@@ -6,10 +6,22 @@ const helpers = require('./helpers');
  * @return {object}
  */
 exports.today = async ({ request, $ }) => {
-    const summary = $(helpers.getTestIdHierarchySelector(['CurrentConditionsContainer']));
-    const details = $(helpers.getTestIdHierarchySelector(['TodaysDetailsModule', 'WeatherDetailsListItem', 'wxData']));
+    const summary = $(
+        helpers.getTestIdHierarchySelector(['CurrentConditionsContainer']),
+    );
+    const details = $(
+        helpers.getTestIdHierarchySelector([
+            'TodaysDetailsModule',
+            'WeatherDetailsListItem',
+            'wxData',
+        ]),
+    );
 
-    const location = summary.find('h1').text().replace(/Weather$/, '').trim();
+    const location = summary
+        .find('h1')
+        .text()
+        .replace(/Weather$/, '')
+        .trim();
     const time = summary.find('[class*="timestamp"]').text();
     const temperature = summary.find('[class*="tempValue"]').text();
 

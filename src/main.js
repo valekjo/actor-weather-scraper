@@ -39,7 +39,9 @@ function createHandlePageFunction({ extendOutputFunction }) {
     return async ({ request, $, response, ...rest }) => {
         // omit all non 200 status code pages
         if (response.statusCode !== 200) {
-            log.warning(`Url ${request.url} resulted in ${response.statusCode} http code. Omitting.`);
+            log.warning(
+                `Url ${request.url} resulted in ${response.statusCode} http code. Omitting.`,
+            );
             return;
         }
         try {
@@ -52,7 +54,9 @@ function createHandlePageFunction({ extendOutputFunction }) {
             try {
                 const userData = extendOutputFunction($);
                 if (!helpers.isObject(userData)) {
-                    throw new Error('Extended output function did not return an object.');
+                    throw new Error(
+                        'Extended output function did not return an object.',
+                    );
                 }
                 // combine default and users data
                 data = { ...data, ...userData };

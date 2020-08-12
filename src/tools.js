@@ -53,11 +53,7 @@ exports.initRequestQueue = async ({
     await Apify.setValue('zipCodes', foundZipCodes);
 
     // combine all results
-    const places = [
-        ...startPlaces,
-        ...foundCities,
-        ...foundZipCodes,
-    ];
+    const places = [...startPlaces, ...foundCities, ...foundZipCodes];
 
     log.info(`Found ${places.length} places to crawl.`);
 
@@ -69,11 +65,7 @@ exports.initRequestQueue = async ({
 
     // put all places to request queue
     for (let i = 0; i < places.length; i++) {
-        const options = createRequestOptions(
-            places[i],
-            timeFrame,
-            locale,
-        );
+        const options = createRequestOptions(places[i], timeFrame, locale);
         await requestQueue.addRequest(options);
     }
 
@@ -107,7 +99,10 @@ async function getPlacesBySearchQuery(query) {
 
     log.debug('Place search api response body', response.body);
 
-    if (!response.body.dal || !response.body.dal.getSunV3LocationSearchUrlConfig) {
+    if (
+        !response.body.dal
+        || !response.body.dal.getSunV3LocationSearchUrlConfig
+    ) {
         throw new Error('Place search api returned unknown response');
     }
 
