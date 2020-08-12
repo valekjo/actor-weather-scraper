@@ -51,9 +51,6 @@ exports.initRequestQueue = async ({
     // search for zip codes
     const foundZipCodes = await getZipCodes(zipCodes);
 
-    await Apify.setValue('cities', foundCities);
-    await Apify.setValue('zipCodes', foundZipCodes);
-
     // combine all results
     const places = [...startPlaces, ...foundCities, ...foundZipCodes];
 
