@@ -1,4 +1,5 @@
 const Apify = require('apify');
+const constants = require('./constants');
 
 /**
  *
@@ -26,21 +27,23 @@ const processExtendOutputFunction = (extendOutputFunction) => {
  */
 exports.getConfig = async () => {
     const input = await Apify.getInput();
-    const { extendOutputFunction, maxItems, zipCodes, cities, units } = input;
+    const { extendOutputFunction, maxItems, zipCodes, cities, units, startUrls, timeFrame } = input;
 
     // convert extend output function from string to function
     const evaluatedExtendOutputFunction = processExtendOutputFunction(
         extendOutputFunction,
     );
 
-    const maxRequestsPerCrawl = maxItems > 0 ? maxItems : undefined;
+    constants.validateTimeFrame(timeFrame);
 
     return {
         ...input,
         extendOutputFunction: evaluatedExtendOutputFunction,
-        maxRequestsPerCrawl,
+        maxRequestsPerCrawl: maxItems > 0 ? maxItems : undefined,
+        startUrls: startUrls || [],
         zipCodes: zipCodes || [],
         cities: cities || [],
         units: units || 'METRIC',
+        timeFrame,
     };
 };

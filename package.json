@@ -3,8 +3,14 @@
 	"version": "0.0.1",
 	"description": "This is an example of an Apify actor.",
 	"dependencies": {
-		"apify": "^0.21.0"
-	},
+		"apify": "^0.21.0",
+		"lodash": "^4.17.19",
+		"slugify": "^1.4.5"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/valekjo/actor-weather-scraper.git"
+    },
 	"devDependencies": {
 		"@apify/eslint-config": "^0.1.0",
 		"eslint": "^7.6.0",

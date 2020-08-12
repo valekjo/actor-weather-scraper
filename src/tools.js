@@ -1,4 +1,6 @@
 const Apify = require('apify');
+const slugify = require('slugify');
+const _ = require('lodash');
 const helpers = require('./helpers');
 
 const {
@@ -7,17 +9,18 @@ const {
 
 /**
  *
+ * All needed data are available from ten day page.
+ *
  * @param {object} place
  * @param {string} timeFrame
  * @param {string} locale
  * @return {Apify.RequestOptions}
  */
 function createRequestOptions(place, timeFrame, locale) {
-    const url = `https://weather.com/${locale}/weather/${timeFrame}/l/${place.placeId}`;
+    const url = `https://weather.com/${locale}/weather/tenday/l/${place.placeId}`;
     return {
         url,
         userData: {
-            pageType: timeFrame,
             place,
         },
     };
@@ -34,7 +37,6 @@ exports.initRequestQueue = async ({
     cities,
     zipCodes,
     units,
-    timeFrame,
 }) => {
     log.info('Initializing request queue.');
 
@@ -55,17 +57,17 @@ exports.initRequestQueue = async ({
     // combine all results
     const places = [...startPlaces, ...foundCities, ...foundZipCodes];
 
-    log.info(`Found ${places.length} places to crawl.`);
+    log.info(`Found ${places.length} place(s) to scrape.`);
 
     // create request queue
     const requestQueue = await Apify.openRequestQueue();
 
     // determine which locale to use based on desired units
-    const locale = units === 'METRIC' ? 'en-GB' : 'en-US';
+    const locale = units === 'METRIC' ? 'en-CA' : 'en-US';
 
     // put all places to request queue
     for (let i = 0; i < places.length; i++) {
-        const options = createRequestOptions(places[i], timeFrame, locale);
+        const options = createRequestOptions(places[i], locale);
         await requestQueue.addRequest(options);
     }
 
@@ -75,7 +77,8 @@ exports.initRequestQueue = async ({
 };
 
 /**
- * Simulate a search on weather.com
+ * Simulate a search on weather.com.
+ *
  * @param {string} query
  * @returns {Array<object>} Array of relevant places
  */
@@ -129,9 +132,20 @@ async function getPlacesBySearchQuery(query) {
  * @return {Array<object>}
  */
 async function getCities(names) {
+    const normalizeName = (name) => {
+        return slugify(name, { lower: true, replacement: '-' }).split('-');
+    };
+
+    const matchNormalizedNames = (a, b) => {
+        return _.intersection(a, b).length > 0;
+    };
+
     const createFilter = (name) => {
+        const searchName = normalizeName(name);
         return (place) => {
-            return place.city.toLowerCase().includes(name.trim().toLowerCase());
+            const placeAddress = normalizeName(place.address);
+            const result = matchNormalizedNames(placeAddress, searchName);
+            return result;
         };
     };
     const result = await getFilteredPlaces(names, createFilter);

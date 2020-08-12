@@ -1,3 +1,7 @@
+const Apify = require('apify');
+
+const { utils: { log } } = Apify;
+
 /**
  * Convert table-like object-of-arrays locations to array-of-objects with corresponding keys.
  *
@@ -26,16 +30,6 @@ exports.objectOfArraysToArrayOfObjects = (data) => {
     }
 
     return items;
-};
-
-/**
- * Converts array of data-testid attributes to actual css selector.
- *
- * @param {Array<string>} testIds
- * @return {string}
- */
-exports.getTestIdHierarchySelector = (testIds) => {
-    return testIds.map((testId) => `[data-testid="${testId}"]`).join(' ');
 };
 
 /**
@@ -79,4 +73,59 @@ exports.getPlaceIdFromUrl = (urlString) => {
     const url = new URL(urlString);
     const placeId = url.pathname.split('/').pop();
     return placeId;
+};
+
+/**
+ * This is the most fragile part of an actor, as it makes strong assumptions about
+ * javascript contained in page structure.
+ *
+ * @param {string} data
+ * @returns {Array|object}
+ */
+exports.parseWindowDataScript = (data) => {
+    try {
+        let jsonData = data.replace(/^(window\.__data=.*;)\s*window\..*$/, '$1');
+        // some cases need double parsing
+        if (jsonData.startsWith('window.__data=JSON.parse')) {
+            jsonData = jsonData.replace(/^window.__data=JSON.parse\((.*)\);$/, '$1');
+            return JSON.parse(JSON.parse(jsonData));
+        }
+        jsonData = jsonData.replace(/^window.__data=(.*);$/, '$1');
+        return JSON.parse(jsonData);
+    } catch (e) {
+        log.error(`${e}`);
+        log.error('Unable to parse site script, most likely due to change of structure.');
+        throw e;
+    }
+};
+
+/**
+ * Extract `window.__data` from javascript code on page.
+ *
+ * @param {JQueryStatic} $
+ */
+exports.getWindowData = ($) => {
+    // load data script from page
+    const dataScript = $('script').filter((i, scriptEl) => {
+        if (scriptEl.children.length === 0) {
+            return false;
+        }
+        const { data } = scriptEl.children[0];
+        return data.startsWith('window.__data=');
+    }).get()[0].children[0].data;
+    const data = this.parseWindowDataScript(dataScript);
+    return data;
+};
+
+/**
+ *
+ * @param {*} data
+ */
+exports.getObjectFirstKey = (data) => {
+    const keys = Object.keys(data);
+    if (keys.length === 0) {
+        throw new Error('Object does not have a single key');
+    }
+    const key = keys[0];
+    return data[key];
 };

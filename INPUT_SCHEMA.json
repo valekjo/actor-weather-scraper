@@ -32,7 +32,7 @@
         "zipCodes": {
             "title": "Search Zip Code",
             "type": "array",
-            "description": "Enter zpi codes you want to scrape",
+            "description": "Enter zip codes you want to scrape",
             "prefill": [],
             "default": [],
             "editor": "stringList"
@@ -52,8 +52,8 @@
             "description": "Select time frame",
             "editor": "select",
             "default": "today",
-            "enum": ["today"],
-            "enumTitles": ["Today"]
+            "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
+            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
         },
         "maxItems": {
             "title": "Max items",
@@ -85,5 +85,5 @@
             "sectionCaption": "Advanced options"
         }
     },
-    "required": ["startUrls", "proxyConfiguration", "extendOutputFunction"]
+    "required": ["proxyConfiguration", "extendOutputFunction"]
 }

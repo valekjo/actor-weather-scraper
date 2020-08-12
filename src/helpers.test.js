@@ -71,3 +71,15 @@ test('zip code equality', () => {
         expect(helpers.zipCodeEquals(a, b)).toBe(result);
     });
 });
+
+test('parses data script', () => {
+    const data = [
+        { input: 'window.__data=JSON.parse("{}");', output: {} },
+        { input: 'window.__data=JSON.parse("{}");window.experience={}', output: {} },
+        { input: 'window.__data={};', output: {} },
+        { input: 'window.__data={};window.experience={"connectionSpeed":"4g","deviceClass":"desktop"};', output: {} },
+    ];
+    data.forEach(({ input, output }) => {
+        expect(helpers.parseWindowDataScript(input)).toEqual(output);
+    });
+});

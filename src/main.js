@@ -1,7 +1,7 @@
 const Apify = require('apify');
 const tools = require('./tools');
 const config = require('./config');
-const pages = require('./pages');
+const page = require('./page');
 const helpers = require('./helpers');
 
 const {
@@ -14,6 +14,7 @@ Apify.main(async () => {
         proxyConfiguration,
         extendOutputFunction,
         maxRequestsPerCrawl,
+        timeFrame,
     } = configuration;
 
     const requestQueue = await tools.initRequestQueue(configuration);
@@ -26,7 +27,7 @@ Apify.main(async () => {
     const crawler = new Apify.CheerioCrawler({
         maxRequestsPerCrawl,
         requestQueue,
-        handlePageFunction: createHandlePageFunction({ extendOutputFunction }),
+        handlePageFunction: createHandlePageFunction({ extendOutputFunction, timeFrame }),
         proxyConfiguration: proxyConfig,
     });
 
@@ -35,7 +36,7 @@ Apify.main(async () => {
     log.info('Actor finished.');
 });
 
-function createHandlePageFunction({ extendOutputFunction }) {
+function createHandlePageFunction({ extendOutputFunction, timeFrame }) {
     return async ({ request, $, response, ...rest }) => {
         // omit all non 200 status code pages
         if (response.statusCode !== 200) {
@@ -45,10 +46,7 @@ function createHandlePageFunction({ extendOutputFunction }) {
             return;
         }
         try {
-            // determine which page handler to call
-            const { pageType } = request.userData;
-            const pageFunction = pages[pageType];
-            let data = await pageFunction({ request, $, response, ...rest });
+            let results = await page.handlePage({ request, $, response, timeFrame, ...rest });
 
             // try to call extended output function and append the data
             try {
@@ -58,13 +56,16 @@ function createHandlePageFunction({ extendOutputFunction }) {
                         'Extended output function did not return an object.',
                     );
                 }
-                // combine default and users data
-                data = { ...data, ...userData };
+                // combine found and users data
+                results = results.map((row) => ({ ...row, ...userData }));
             } catch (e) {
                 log.error(`Error in extendedOutputFunction. Error: ${e}`);
             }
 
-            Apify.pushData(data);
+            // save all data
+            for (let i = 0; i < results.length; i++) {
+                await Apify.pushData(results[i]);
+            }
         } catch (e) {
             // die in case of unresolved exception
             log.error(

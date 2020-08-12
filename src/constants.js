@@ -1,0 +1,19 @@
+exports.TIME_FRAME_TODAY = 'today';
+exports.TIME_FRAME_HOUR_BY_HOUR = 'hour_by_hour';
+exports.TIME_FRAME_TEN_DAYS = 'ten_days';
+exports.TIME_FRAME_WEEKEND = 'weekend';
+exports.TIME_FRAME_MONTH = 'month';
+
+const TIME_FRAMES = [
+    this.TIME_FRAME_TODAY,
+    this.TIME_FRAME_HOUR_BY_HOUR,
+    this.TIME_FRAME_TEN_DAYS,
+    this.TIME_FRAME_WEEKEND,
+    this.TIME_FRAME_MONTH,
+];
+
+exports.validateTimeFrame = (timeFrame) => {
+    if (TIME_FRAMES.indexOf(timeFrame) === -1) {
+        throw new Error(`${timeFrame} is not a valid time frame`);
+    }
+};
