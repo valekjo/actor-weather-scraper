@@ -11,11 +11,11 @@ Weather Scraper is an [Apify actor](https://apify.com/actors) for extracting wea
 
 | Field | Type | Description | Default value
 | ----- | ---- | ----------- | -------------|
-| startUrls | array | List of place urls to be processed |
-| cities | array |
-| zipCodes | array |
-| units | string |
-| timeFrame | string |
+| startUrls | array | List of place urls to be processed | `[]` |
+| cities | array | List of cities / addresses to be processed | `[]` |
+| zipCodes | array | List of zip codes to be processed | `[]` |
+| units | string | Unit system to use for the results | `metric` |
+| timeFrame | string | Feature time frame you want to extract data for | `today` |
 | maxItems | number | Maximum number of actor pages that will be scraped | all found |
 | extendOutputFunction | string | Function that takes a JQuery handle ($) as argument and returns data that will be merged with the default output. More information in [Extend output function](#extend-output-function) | |
 | proxyConfiguration | object | Proxy settings of the run. If you have access to Apify proxy, leave the default settings. If not, you can set `{ "useApifyProxy": false" }` to disable proxy usage | `{ "useApifyProxy": true }`|
@@ -76,75 +76,35 @@ You can return fields to achive 3 different things:
 ```
 ($) => {
     return {
-        title: $('.fxqkUh p').eq(0).text(),
-        url-title: undefined,
-        modified: $('.stats time').eq(0).text(),
+        title: $('title').text(),
+        humidity: undefined,
+        temperature: 451,
     }
 }
 ```
-This example will add a new field `modified`, change the `title` field and remove `url-title` field
+This example will add a new field `title`, change the `temperature` field and remove `humidity` field
 ```
 {
-    "title": "lukaskrivka/apify-store-scraper"
-    "sourceUrl": "https://github.com/metalwarrior665/apify-store-scraper",
-    "usedTimes": 50000,
-    "description": "Scrape all information about actors in Apify Store!",
-    "modified: "3 months ago"
+  "title": "Třeboň, South Bohemia, Czech Republic 10-Day Weather Forecast - The Weather Channel | Weather.com"
+  "city": "Třeboň",
+  "state": "South Bohemia",
+  "country": "Czech Republic",
+  "zipCode": "379 01",
+  "time": "2020-08-12T19:00:00+0200",
+  "temperature": 451,
+  "forecast": "Sunny",
+  "windDirection": "E",
+  "windSpeed": 7
 }
 ```
 
+Note that all the data are scraped from ten day page (eg. `https://weather.com/weather/tenday/l/81cbe8a06fd80171651aef7a414bce1e599aa05082d82f4e319f94b4b60602e0`).
+
 ### Epilogue
-Thank you for trying my actor. I will be very glad for a feedback that you can send to my email `lukas@apify.com`. If you find any bug, please create an issue on the [Github page](https://github.com/metalwarrior665/actor-public-actor-input-example/issues).
-
-----------------------------------------------------------------------------------------
-
-
-
-## Dev Notes
-
-All places available on weather.com are identified by placeId.
-
-Url for respective weather pages is then `https://weather.com/${locale}/weather/{today|hourbyhour|tenday|weekend|monthly}/l/${placeId}`
-
-
- - Location might be used instead of trying to set measurement units in cookies:
-
-   - `en-US`, `en-CA` for `F`, `C` respectively
-
-
- - finding location ids for address / zip / etc can be done using:
-
-```
- curl 'https://weather.com/api/v1/p/redux-dal' \
->   -H 'content-type: application/json' \
->   --data-binary '[{"name":"getSunV3LocationSearchUrlConfig","params":{"query":"11000","language":"cs-CZ","locationType":"locale"}}]' \
->   --compressed
-```
-
-Algorithm:
-
-1. Get all relevant placeIds by:
-  - parsing them from startUrls
-  - search for them by query (city, zip)
-
-2. Construct urls for combination of placeId, time frame and units
-
-
-
-### Problems
-
-Switching between metric and imperial units happens through cookies - but the desired result can be achieved by accessing page with specific locale (but how about cookies? are the same cookies used all the time in the crawler?) - does not matter - whole crawl uses the same minutes.
-
-Zip code, state, etc. are not present in the page code. However, they can be obtained through page search (which is already used to search for places by name.) so we can use the same to obtain more details.
-
-Monthly a weekday pages have different structures than the rest.
-
+Thank you for trying my actor. I will be very glad for a feedback that you can send to my email `josef@apify.com`. If you find any bug, please create an issue on the [Github page](https://github.com/valekjo/actor-weather-scraper/issues).
 
 ### TODO
 
- 1. input validation
- 2. error handling
- 3. specific page handlers
  4. tests
- 5. output cleanup
  6. readme, license, etc
+ 7. legal ?

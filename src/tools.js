@@ -2,6 +2,8 @@ const Apify = require('apify');
 const slugify = require('slugify');
 const _ = require('lodash');
 const helpers = require('./helpers');
+const constants = require('./constants');
+const page = require('./page');
 
 const {
     utils: { log, requestAsBrowser },
@@ -16,7 +18,7 @@ const {
  * @param {string} locale
  * @return {Apify.RequestOptions}
  */
-function createRequestOptions(place, timeFrame, locale) {
+function createRequestOptions(place, locale) {
     const url = `https://weather.com/${locale}/weather/tenday/l/${place.placeId}`;
     return {
         url,
@@ -60,7 +62,7 @@ exports.initRequestQueue = async ({
     const requestQueue = await Apify.openRequestQueue();
 
     // determine which locale to use based on desired units
-    const locale = units === 'METRIC' ? 'en-CA' : 'en-US';
+    const locale = units === constants.UNITS_METRIC ? 'en-CA' : 'en-US';
 
     // put all places to request queue
     for (let i = 0; i < places.length; i++) {
@@ -133,8 +135,8 @@ async function getCities(names) {
         return slugify(name, { lower: true, replacement: '-' }).split('-');
     };
 
-    const matchNormalizedNames = (a, b) => {
-        return _.intersection(a, b).length > 0;
+    const matchNormalizedNames = (found, search) => {
+        return _.intersection(found, search).length > 0;
     };
 
     const createFilter = (name) => {
@@ -186,3 +188,50 @@ async function getFilteredPlaces(searchQueries, creteFilterForQuery) {
     }
     return Array.from(result.values());
 }
+
+/**
+ * Creates function to handle page.
+ *
+ * @param {object} param0
+ */
+exports.createHandlePageFunction = ({ extendOutputFunction, timeFrame }) => {
+    return async ({ request, $, response, ...rest }) => {
+        log.info(`Scraping url: ${request.url}`);
+
+        // omit all non 200 status code pages
+        if (response.statusCode !== 200) {
+            log.warning(
+                `Url ${request.url} resulted in ${response.statusCode} http code. Omitting.`,
+            );
+            return;
+        }
+        try {
+            let results = await page.handlePage({ request, $, response, timeFrame, ...rest });
+
+            // try to call extended output function and append the data
+            try {
+                const userData = extendOutputFunction($);
+                if (!helpers.isObject(userData)) {
+                    throw new Error(
+                        'Extended output function did not return an object.',
+                    );
+                }
+                // combine found and users data
+                results = results.map((row) => ({ ...row, ...userData }));
+            } catch (e) {
+                log.error(`Error in extendedOutputFunction. Error: ${e}`);
+            }
+
+            // save all data
+            for (let i = 0; i < results.length; i++) {
+                await Apify.pushData(results[i]);
+            }
+        } catch (e) {
+            // die in case of unresolved exception
+            log.error(
+                `Error occurred while processing url: ${request.url}. Shutting down. Error: ${e}`,
+            );
+            process.exit(1);
+        }
+    };
+};

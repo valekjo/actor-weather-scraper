@@ -42,8 +42,9 @@
             "type": "string",
             "description": "Select units",
             "editor": "select",
-            "prefill": "METRIC",
-            "enum": ["IMPERIAL", "METRIC"],
+            "prefill": "metric",
+            "default": "metric",
+            "enum": ["imperial", "metric"],
             "enumTitles": ["Imperial (F)", "Metric (C)"]
         },
         "timeFrame": {

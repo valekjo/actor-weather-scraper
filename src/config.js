@@ -24,6 +24,8 @@ const processExtendOutputFunction = (extendOutputFunction) => {
 
 /**
  * Load and validate input configuration.
+ *
+ * @returns {object}
  */
 exports.getConfig = async () => {
     const input = await Apify.getInput();
@@ -36,6 +38,9 @@ exports.getConfig = async () => {
 
     constants.validateTimeFrame(timeFrame);
 
+    const validUnits = units || constants.UNITS_METRIC;
+    constants.validateUnits(validUnits);
+
     return {
         ...input,
         extendOutputFunction: evaluatedExtendOutputFunction,
@@ -43,7 +48,7 @@ exports.getConfig = async () => {
         startUrls: startUrls || [],
         zipCodes: zipCodes || [],
         cities: cities || [],
-        units: units || 'METRIC',
+        units: validUnits,
         timeFrame,
     };
 };

@@ -24,5 +24,5 @@
 		"test": "jest"
 	},
 	"author": "It's not you it's me",
-	"license": "ISC"
+    "license": "Apache-2.0"
 }
