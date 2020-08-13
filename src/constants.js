@@ -1,6 +1,6 @@
 exports.TIME_FRAME_TODAY = 'today';
 exports.TIME_FRAME_HOUR_BY_HOUR = 'hour_by_hour';
-exports.TIME_FRAME_TEN_DAYS = 'ten_days';
+exports.TIME_FRAME_TEN_DAYS = 'ten_day';
 exports.TIME_FRAME_WEEKEND = 'weekend';
 exports.TIME_FRAME_MONTH = 'month';
 
