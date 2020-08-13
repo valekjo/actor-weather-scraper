@@ -102,9 +102,3 @@ Note that all the data are scraped from ten day page (eg. `https://weather.com/w
 
 ### Epilogue
 Thank you for trying my actor. I will be very glad for a feedback that you can send to my email `josef@apify.com`. If you find any bug, please create an issue on the [Github page](https://github.com/valekjo/actor-weather-scraper/issues).
-
-### TODO
-
- 4. tests
- 6. readme, license, etc
- 7. legal ?
