@@ -26,7 +26,7 @@
             "type": "string",
             "description": "Select units",
             "editor": "select",
-            "prefill": "metric",
+            "prefill": "imperial",
             "default": "imperial",
             "enum": ["imperial", "metric"],
             "enumTitles": ["Imperial (F)", "Metric (C)"]
