@@ -61,17 +61,6 @@ test('location id is parsed properly', () => {
     });
 });
 
-test('zip code equality', () => {
-    const data = [
-        [['12300', '123 00'], true],
-        [['12300', '123 00:FR'], true],
-        [['12300', '123 000'], false],
-    ];
-    data.forEach(([[a, b], result]) => {
-        expect(helpers.zipCodeEquals(a, b)).toBe(result);
-    });
-});
-
 test('parses data script', () => {
     const data = [
         { input: 'window.__data=JSON.parse("{}");', output: {} },

@@ -43,27 +43,6 @@ exports.isObject = (o) => {
 };
 
 /**
- * Normalizes zip code to deal with different typing styles.
- *
- * @param {string} zipCode
- * @return {string}
- */
-function normalizeZipCode(zipCode) {
-    return zipCode.replace(/[^0-9]/g, '');
-}
-
-/**
- * Check if the given zip codes are equal.
- *
- * @param {string} a
- * @param {string} b
- * @return {boolean}
- */
-exports.zipCodeEquals = (a, b) => {
-    return normalizeZipCode(a) === normalizeZipCode(b);
-};
-
-/**
  * Extract Weather place id from url.
  *
  * @param {string} urlString

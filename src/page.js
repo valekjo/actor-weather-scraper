@@ -41,7 +41,7 @@ function getForecastsByType(fullData, forecastType) {
         return rawForecasts.map(getSingleForecast);
     }
     if (forecastType === FORECAST_TYPE_DAILY) {
-        const data = helpers.getObjectFirstKey(fullData.dal.getSunV3DailyForecastUrlConfig);
+        const data = helpers.getObjectFirstKey(fullData.dal.getSunV3DailyForecastWithHeadersUrlConfig);
         return getDailyForecasts(data.data);
     }
 

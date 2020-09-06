@@ -189,6 +189,9 @@ exports.createHandlePageFunction = ({ extendOutputFunction, timeFrame }) => {
             // die in case of unresolved exception
             log.error(
                 `Error occurred while processing url: ${request.url}. Shutting down. Error: ${e}`,
+                {
+                    e,
+                },
             );
             process.exit(1);
         }
