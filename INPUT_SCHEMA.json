@@ -54,8 +54,7 @@
             "description": "Enter locations you want to scrape",
             "prefill": [],
             "default": [],
-            "editor": "stringList",
-            "sectionCaption": "Advanced options"
+            "editor": "stringList"
         },
         "timeFrame": {
             "title": "Time Frame",
@@ -64,8 +63,7 @@
             "editor": "select",
             "default": "today",
             "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
-            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"],
-            "sectionCaption": "Advanced options"
+            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
         },
         "proxyConfiguration": {
             "title": "Proxy configuration",
@@ -77,8 +75,7 @@
             "prefill": {
                 "useApifyProxy": true
             },
-            "editor": "proxy",
-            "sectionCaption": "Advanced options"
+            "editor": "proxy"
         },
         "extendOutputFunction": {
             "title": "Extend output function",
@@ -87,8 +84,7 @@
             "description": "A function which result will get merged with the default result. It must return an object.",
             "example": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
             "default": "() => ({})",
-            "prefill": "() => ({})",
-            "sectionCaption": "Advanced options"
+            "prefill": "() => ({})"
         }
     },
     "required": ["proxyConfiguration", "extendOutputFunction"]
