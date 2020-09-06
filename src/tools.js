@@ -41,10 +41,20 @@ exports.initRequestQueue = async ({
 }) => {
     log.info('Initializing request queue.');
 
-    // convert startUrls to place-like objects (with only placeId present)
-    const startPlaces = startUrls.map((urlObject) => {
+    const directUrls = startUrls.filter((urlObject) => !!urlObject.url);
+    const urlFiles = startUrls.filter((urlObject) => !!urlObject.requestsFromUrl);
+
+    // Convert direct startUrls to place-like objects (with only placeId present)
+    const startPlaces = directUrls.map((urlObject) => {
         return { placeId: helpers.getPlaceIdFromUrl(urlObject.url) };
     });
+
+    // Append all urls from url files
+    for (let i = 0; i < urlFiles.length; i++) {
+        const urlObject = urlFiles[i];
+        const urls = await getUrlsFromRemoteFile(urlObject.requestsFromUrl);
+        startPlaces.push(...urls.map((url) => ({ placeId: helpers.getPlaceIdFromUrl(url) })));
+    }
 
     // Search for places by given locations
     const foundLocations = await getPlacesBySearchQueries(locations);
@@ -75,6 +85,17 @@ exports.initRequestQueue = async ({
 
     return requestQueue;
 };
+
+/**
+ * Load urls from remote text file.
+ *
+ * @param {String} url
+ */
+async function getUrlsFromRemoteFile(url) {
+    const response = await requestAsBrowser({ url });
+    const lines = response.body.split('\n').map((line) => line.trim()).filter((line) => !!line);
+    return lines;
+}
 
 /**
  * Simulate a search on weather.com.
