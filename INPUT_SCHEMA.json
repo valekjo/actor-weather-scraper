@@ -9,33 +9,17 @@
             "description": "",
             "prefill": [
                 {
-                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
+                    "url": "https://weather.com/weather/today/l/f892433d7660da170347398eb8e3d722d8d362fe7dd15af16ce88324e1b96e70"
                 }
             ],
             "example": [
                 {
-                    "url": "https://weather.com/en-US/weather/today/l/a29fd98118188e1bcd8684c8152b235597d0cb3e5009426bee910a937958a000"
+                    "url": "https://weather.com/weather/today/l/f892433d7660da170347398eb8e3d722d8d362fe7dd15af16ce88324e1b96e70"
                 }
             ],
             "type": "array",
             "uniqueItems": true,
             "editor": "requestListSources"
-        },
-        "cities": {
-            "title": "Search City",
-            "type": "array",
-            "description": "Enter cities you want to scrape",
-            "prefill": [],
-            "default": [],
-            "editor": "stringList"
-        },
-        "zipCodes": {
-            "title": "Search Zip Code",
-            "type": "array",
-            "description": "Enter zip codes you want to scrape",
-            "prefill": [],
-            "default": [],
-            "editor": "stringList"
         },
         "units": {
             "title": "Units",
@@ -43,9 +27,35 @@
             "description": "Select units",
             "editor": "select",
             "prefill": "metric",
-            "default": "metric",
+            "default": "imperial",
             "enum": ["imperial", "metric"],
             "enumTitles": ["Imperial (F)", "Metric (C)"]
+        },
+        "maxItems": {
+            "title": "Max items",
+            "type": "integer",
+            "minimum": 0,
+            "description": "Limit of product items to be scraped. Zero value means no limit.",
+            "prefill": 10,
+            "default": 10
+        },
+        "locations": {
+            "title": "Search Locations by name",
+            "type": "array",
+            "description": "Enter locations you want to scrape",
+            "prefill": [],
+            "default": [],
+            "editor": "stringList",
+            "sectionCaption": "Advanced options"
+        },
+        "locationIds": {
+            "title": "Search Locations by location id",
+            "type": "array",
+            "description": "Enter locations you want to scrape",
+            "prefill": [],
+            "default": [],
+            "editor": "stringList",
+            "sectionCaption": "Advanced options"
         },
         "timeFrame": {
             "title": "Time Frame",
@@ -54,14 +64,8 @@
             "editor": "select",
             "default": "today",
             "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
-            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
-        },
-        "maxItems": {
-            "title": "Max items",
-            "type": "integer",
-            "minimum": 0,
-            "description": "Limit of product items to be scraped. Zero value means no limit.",
-            "prefill": 0
+            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"],
+            "sectionCaption": "Advanced options"
         },
         "proxyConfiguration": {
             "title": "Proxy configuration",
@@ -73,7 +77,8 @@
             "prefill": {
                 "useApifyProxy": true
             },
-            "editor": "proxy"
+            "editor": "proxy",
+            "sectionCaption": "Advanced options"
         },
         "extendOutputFunction": {
             "title": "Extend output function",

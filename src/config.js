@@ -29,7 +29,7 @@ const processExtendOutputFunction = (extendOutputFunction) => {
  */
 exports.getConfig = async () => {
     const input = await Apify.getInput();
-    const { extendOutputFunction, maxItems, zipCodes, cities, units, startUrls, timeFrame } = input;
+    const { extendOutputFunction, maxItems, zipCodes, locations, locationIds, units, startUrls, timeFrame } = input;
 
     // convert extend output function from string to function
     const evaluatedExtendOutputFunction = processExtendOutputFunction(
@@ -47,7 +47,8 @@ exports.getConfig = async () => {
         maxRequestsPerCrawl: maxItems > 0 ? maxItems : undefined,
         startUrls: startUrls || [],
         zipCodes: zipCodes || [],
-        cities: cities || [],
+        locations: locations || [],
+        locationIds: locationIds || [],
         units: validUnits,
         timeFrame,
     };

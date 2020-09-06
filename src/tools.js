@@ -1,5 +1,4 @@
 const Apify = require('apify');
-const slugify = require('slugify');
 const _ = require('lodash');
 const helpers = require('./helpers');
 const constants = require('./constants');
@@ -36,8 +35,8 @@ function createRequestOptions(place, locale) {
  */
 exports.initRequestQueue = async ({
     startUrls,
-    cities,
-    zipCodes,
+    locations,
+    locationIds,
     units,
 }) => {
     log.info('Initializing request queue.');
@@ -47,14 +46,16 @@ exports.initRequestQueue = async ({
         return { placeId: helpers.getPlaceIdFromUrl(urlObject.url) };
     });
 
-    // search for places
-    const foundCities = await getCities(cities);
+    // Search for places by given locations
+    const foundLocations = await getPlacesBySearchQueries(locations);
 
-    // search for zip codes
-    const foundZipCodes = await getZipCodes(zipCodes);
+    // Add specified location ids
+    const givenPlaces = locationIds.map((locationId) => {
+        return { placeId: locationId };
+    });
 
     // combine all results
-    const places = [...startPlaces, ...foundCities, ...foundZipCodes];
+    const places = [...startPlaces, ...foundLocations, ...givenPlaces];
 
     log.info(`Found ${places.length} place(s) to scrape.`);
 
@@ -120,71 +121,29 @@ async function getPlacesBySearchQuery(query) {
 
     // convert to more readable form
     const places = helpers.objectOfArraysToArrayOfObjects(locationsTable);
+    Apify.setValue('PLACES', places);
 
     return places;
-}
-
-/**
- * Search for places by city names.
- *
- * @param {Array<string>} names
- * @return {Array<object>}
- */
-async function getCities(names) {
-    const normalizeName = (name) => {
-        return slugify(name, { lower: true, replacement: '-' }).split('-');
-    };
-
-    const matchNormalizedNames = (found, search) => {
-        return _.intersection(found, search).length > 0;
-    };
-
-    const createFilter = (name) => {
-        const searchName = normalizeName(name);
-        return (place) => {
-            const placeAddress = normalizeName(place.address);
-            const result = matchNormalizedNames(placeAddress, searchName);
-            return result;
-        };
-    };
-    const result = await getFilteredPlaces(names, createFilter);
-    return result;
-}
-
-/**
- * Search for places by zip codes.
- *
- * @param {Array<string>} codes
- * @return {Array<object>}
- */
-async function getZipCodes(codes) {
-    const createFilter = (code) => {
-        return (place) => {
-            return helpers.zipCodeEquals(code, place.postalCode);
-        };
-    };
-    const result = await getFilteredPlaces(codes, createFilter);
-    return result;
 }
 
 /**
  * Load places from search api, but only keep those satisfying given conditions.
  *
  * @param {Array<string>} searchQueries
- * @param {string => (any, any) => bool} createFilterForQuery
  * @return {Array<object>}
  */
-async function getFilteredPlaces(searchQueries, creteFilterForQuery) {
+async function getPlacesBySearchQueries(searchQueries) {
     // run all results through map to get rid of duplicities
     const result = new Map();
     for (let i = 0; i < searchQueries.length; i++) {
         const query = searchQueries[i];
         const places = await getPlacesBySearchQuery(query);
-        const filter = creteFilterForQuery(query);
-        // filter places and append them to result
-        places.filter(filter).forEach((place) => {
-            result.set(place.placeId, place);
-        });
+
+        // The first place found is taken into account
+        const matchingPlace = places.length > 0 && places[0];
+        if (matchingPlace) {
+            result.set(matchingPlace.placeId, matchingPlace);
+        }
     }
     return Array.from(result.values());
 }

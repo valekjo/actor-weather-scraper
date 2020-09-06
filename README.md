@@ -12,11 +12,11 @@ Weather Scraper is an [Apify actor](https://apify.com/actors) for extracting wea
 | Field | Type | Description | Default value
 | ----- | ---- | ----------- | -------------|
 | startUrls | array | List of place urls to be processed | `[]` |
-| cities | array | List of cities / addresses to be processed | `[]` |
-| zipCodes | array | List of zip codes to be processed | `[]` |
 | units | string | Unit system to use for the results | `metric` |
-| timeFrame | string | Future time frame you want to extract data for | `today` |
 | maxItems | number | Maximum number of actor pages that will be scraped | all found |
+| locations | array | List of cities / addresses to be processed | `[]` |
+| locationIds | array | List of cities / addresses to be processed | `[]` |
+| timeFrame | string | Future time frame you want to extract data for | `today` |
 | extendOutputFunction | string | Function that takes a JQuery handle ($) as argument and returns data that will be merged with the default output. More information in [Extend output function](#extend-output-function) | |
 | proxyConfiguration | object | Proxy settings of the run. If you have access to Apify proxy, leave the default settings. If not, you can set `{ "useApifyProxy": false" }` to disable proxy usage | `{ "useApifyProxy": true }`|
 
