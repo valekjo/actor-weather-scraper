@@ -4,9 +4,12 @@ const constants = require('./constants');
 /**
  *
  * @param {string} extendOutputFunction
- * @return {function}
+ * @return {function|null}
  */
 const processExtendOutputFunction = (extendOutputFunction) => {
+    if (!extendOutputFunction) {
+        return null;
+    }
     let func;
     try {
         // eslint-disable-next-line no-eval
@@ -31,7 +34,7 @@ exports.getConfig = async () => {
     const input = await Apify.getInput();
     const { extendOutputFunction, maxItems, zipCodes, locations, locationIds, units, startUrls, timeFrame } = input;
 
-    // convert extend output function from string to function
+    // Convert extend output function from string to function (or null)
     const evaluatedExtendOutputFunction = processExtendOutputFunction(
         extendOutputFunction,
     );

@@ -21,6 +21,15 @@
             "uniqueItems": true,
             "editor": "requestListSources"
         },
+        "timeFrame": {
+            "title": "Time Frame",
+            "type": "string",
+            "description": "Select time frame",
+            "editor": "select",
+            "default": "today",
+            "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
+            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
+        },
         "units": {
             "title": "Units",
             "type": "string",
@@ -56,15 +65,6 @@
             "default": [],
             "editor": "stringList"
         },
-        "timeFrame": {
-            "title": "Time Frame",
-            "type": "string",
-            "description": "Select time frame",
-            "editor": "select",
-            "default": "today",
-            "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
-            "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
-        },
         "proxyConfiguration": {
             "title": "Proxy configuration",
             "type": "object",
@@ -87,5 +87,5 @@
             "prefill": "() => ({})"
         }
     },
-    "required": ["proxyConfiguration", "extendOutputFunction"]
+    "required": ["proxyConfiguration", "timeFrame", "units", "maxItems"]
 }

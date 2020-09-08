@@ -31,7 +31,6 @@ function createRequestOptions(place, locale) {
  *
  * @param {*} config
  * @return {Apify.RequestQueue}
- *
  */
 exports.initRequestQueue = async ({
     startUrls,
@@ -40,34 +39,33 @@ exports.initRequestQueue = async ({
     units,
 }) => {
     log.info('Initializing request queue.');
-
-    const directUrls = startUrls.filter((urlObject) => !!urlObject.url);
-    const urlFiles = startUrls.filter((urlObject) => !!urlObject.requestsFromUrl);
-
-    // Convert direct startUrls to place-like objects (with only placeId present)
-    const startPlaces = directUrls.map((urlObject) => {
-        return { placeId: helpers.getPlaceIdFromUrl(urlObject.url) };
+    // Convert start urls to RequestList in order to resolve bulk load urls
+    const requestList = new Apify.RequestList({
+        sources: startUrls,
     });
+    await requestList.initialize();
 
-    // Append all urls from url files
-    for (let i = 0; i < urlFiles.length; i++) {
-        const urlObject = urlFiles[i];
-        const urls = await getUrlsFromRemoteFile(urlObject.requestsFromUrl);
-        startPlaces.push(...urls.map((url) => ({ placeId: helpers.getPlaceIdFromUrl(url) })));
+    // Convert RequestList to list of locations
+    const urlPlaces = [];
+    while (!(await requestList.isEmpty())) {
+        const request = await requestList.fetchNextRequest();
+        urlPlaces.push({
+            placeId: helpers.getPlaceIdFromUrl(request.url),
+        });
     }
 
-    // Search for places by given locations
-    const foundLocations = await getPlacesBySearchQueries(locations);
+    // Search for locations by given search strings
+    const searchPlaces = await getPlacesBySearchQueries(locations);
 
     // Add specified location ids
     const givenPlaces = locationIds.map((locationId) => {
         return { placeId: locationId };
     });
 
-    // combine all results
-    const places = [...startPlaces, ...foundLocations, ...givenPlaces];
+    // Combine all locations together
+    const crawlPlaces = urlPlaces.length > 0 ? urlPlaces : [...searchPlaces, ...givenPlaces];
 
-    log.info(`Found ${places.length} place(s) to scrape.`);
+    log.info(`Found ${crawlPlaces.length} location(s) to scrape.`);
 
     // create request queue
     const requestQueue = await Apify.openRequestQueue();
@@ -76,8 +74,8 @@ exports.initRequestQueue = async ({
     const locale = units === constants.UNITS_METRIC ? 'en-CA' : 'en-US';
 
     // put all places to request queue
-    for (let i = 0; i < places.length; i++) {
-        const options = createRequestOptions(places[i], locale);
+    for (let i = 0; i < crawlPlaces.length; i++) {
+        const options = createRequestOptions(crawlPlaces[i], locale);
         await requestQueue.addRequest(options);
     }
 
@@ -85,17 +83,6 @@ exports.initRequestQueue = async ({
 
     return requestQueue;
 };
-
-/**
- * Load urls from remote text file.
- *
- * @param {String} url
- */
-async function getUrlsFromRemoteFile(url) {
-    const response = await requestAsBrowser({ url });
-    const lines = response.body.split('\n').map((line) => line.trim()).filter((line) => !!line);
-    return lines;
-}
 
 /**
  * Simulate a search on weather.com.
@@ -127,28 +114,28 @@ async function getPlacesBySearchQuery(query) {
         !response.body.dal
         || !response.body.dal.getSunV3LocationSearchUrlConfig
     ) {
-        throw new Error('Place search api returned unknown response');
+        log.info(`Search for: ${query} did not return usable results, skipping`);
+        return [];
     }
 
-    // locate the part of response containing needed data
+    // Locate the part of response containing needed data
     const data = response.body.dal.getSunV3LocationSearchUrlConfig;
     const key = Object.keys(data).pop();
 
     if (!data[key] || !data[key].data || !data[key].data.location) {
-        throw new Error('Place search api returned unknown response.');
+        log.info(`Search for: ${query} did not return usable results, skipping`);
+        return [];
     }
 
     const locationsTable = data[key].data.location;
 
-    // convert to more readable form
+    // Convert to more readable form
     const places = helpers.objectOfArraysToArrayOfObjects(locationsTable);
-    Apify.setValue('PLACES', places);
-
     return places;
 }
 
 /**
- * Load places from search api, but only keep those satisfying given conditions.
+ * Load locations from weather search api.
  *
  * @param {Array<string>} searchQueries
  * @return {Array<object>}
@@ -178,7 +165,7 @@ exports.createHandlePageFunction = ({ extendOutputFunction, timeFrame }) => {
     return async ({ request, $, response, ...rest }) => {
         log.info(`Scraping url: ${request.url}`);
 
-        // omit all non 200 status code pages
+        // Omit all non 200 status code pages
         if (response.statusCode !== 200) {
             log.warning(
                 `Url ${request.url} resulted in ${response.statusCode} http code. Omitting.`,
@@ -188,26 +175,28 @@ exports.createHandlePageFunction = ({ extendOutputFunction, timeFrame }) => {
         try {
             let results = await page.handlePage({ request, $, response, timeFrame, ...rest });
 
-            // try to call extended output function and append the data
-            try {
-                const userData = extendOutputFunction($);
-                if (!helpers.isObject(userData)) {
-                    throw new Error(
-                        'Extended output function did not return an object.',
-                    );
+            // Try to call extended output function if provided and append the data
+            if (extendOutputFunction) {
+                try {
+                    const userData = extendOutputFunction($);
+                    if (!helpers.isObject(userData)) {
+                        throw new Error(
+                            'Extended output function did not return an object.',
+                        );
+                    }
+                    // Combine found and users data
+                    results = results.map((row) => ({ ...row, ...userData }));
+                } catch (e) {
+                    log.error(`Error in extendedOutputFunction. Error: ${e}`);
                 }
-                // combine found and users data
-                results = results.map((row) => ({ ...row, ...userData }));
-            } catch (e) {
-                log.error(`Error in extendedOutputFunction. Error: ${e}`);
             }
 
-            // save all data
+            // Save all data
             for (let i = 0; i < results.length; i++) {
                 await Apify.pushData(results[i]);
             }
         } catch (e) {
-            // die in case of unresolved exception
+            // Die in case of unresolved exception
             log.error(
                 `Error occurred while processing url: ${request.url}. Shutting down. Error: ${e}`,
                 {

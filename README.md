@@ -13,12 +13,23 @@ Weather Scraper is an [Apify actor](https://apify.com/actors) for extracting wea
 | ----- | ---- | ----------- | -------------|
 | startUrls | array | List of place urls to be processed | `[]` |
 | units | string | Unit system to use for the results | `metric` |
+| timeFrame | string | Future time frame you want to extract data for | `today` |
 | maxItems | number | Maximum number of actor pages that will be scraped | all found |
 | locations | array | List of cities / addresses to be processed | `[]` |
-| locationIds | array | List of cities / addresses to be processed | `[]` |
-| timeFrame | string | Future time frame you want to extract data for | `today` |
+| locationIds | array | List of location ids to be processed | `[]` |
 | extendOutputFunction | string | Function that takes a JQuery handle ($) as argument and returns data that will be merged with the default output. More information in [Extend output function](#extend-output-function) | |
 | proxyConfiguration | object | Proxy settings of the run. If you have access to Apify proxy, leave the default settings. If not, you can set `{ "useApifyProxy": false" }` to disable proxy usage | `{ "useApifyProxy": true }`|
+
+
+#### Determining locations
+
+In advanced input section, you can provide `locations` parameter - list of addresses you want to scrape. The actual scraped place is the first result in search box on weather.com. In order to get relevant results (which is not always guaranteed in this case), try to input both city and country name (eg. `Paris, France`, `Vienna, Austria`).
+
+If specific locations are needed, you can provide `locationIds` parameter. Location id is used by weather.com to identify specific location. It can be found in the url of a place, it is the last parameter in path. Few examples:
+
+For New York, NY, which url is `https://weather.com/cs-CZ/weather/tenday/l/f892433d7660da170347398eb8e3d722d8d362fe7dd15af16ce88324e1b96e70` the location id is `f892433d7660da170347398eb8e3d722d8d362fe7dd15af16ce88324e1b96e70`. For London, England with url `https://weather.com/en-UK/weather/today/l/7517a52d4d1815e639ae1001edb8c5fda2264ea579095b0f28f55c059599e074` the location id is `7517a52d4d1815e639ae1001edb8c5fda2264ea579095b0f28f55c059599e074`.
+
+Note that if the `startUrls` parameter is provided, `locations` and `locationIds` parameters are ignored.
 
 ### Output
 
