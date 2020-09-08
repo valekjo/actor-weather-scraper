@@ -67,7 +67,7 @@ Example for current values:
 ```
 
 
-### Compute units consumption
+### [WIP] Compute units consumption
 Keep in mind that it is much more efficient to run one longer scrape (at least one minute) than more shorter ones because of the startup time.
 
 The average consumption is **1 Compute unit for 1000 actor pages** scraped
