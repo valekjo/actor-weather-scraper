@@ -9,13 +9,14 @@ const constants = require('./constants');
  */
 function getLocation(fullData) {
     const locationData = helpers.getObjectFirstKey(fullData.dal.getSunV3LocationPointUrlConfig);
-    const { city, adminDistrict, postalCode, country } = locationData.data.location;
+    const { city, adminDistrict, postalCode, country, placeId } = locationData.data.location;
 
     return {
         city,
         state: adminDistrict,
         country,
         zipCode: postalCode,
+        locationId: placeId,
     };
 }
 
