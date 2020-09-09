@@ -51,7 +51,7 @@
         "locations": {
             "title": "Search Locations by name",
             "type": "array",
-            "description": "Enter locations you want to scrape",
+            "description": "Input must be in: City, State, Country or City, Country",
             "prefill": [],
             "default": [],
             "editor": "stringList",
@@ -60,7 +60,7 @@
         "locationIds": {
             "title": "Search Locations by location id",
             "type": "array",
-            "description": "Enter locations you want to scrape",
+            "description": "ID is in the last part of URL on weather.com",
             "prefill": [],
             "default": [],
             "editor": "stringList"

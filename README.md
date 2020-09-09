@@ -67,10 +67,17 @@ Example for current values:
 ```
 
 
-### [WIP] Compute units consumption
-Keep in mind that it is much more efficient to run one longer scrape (at least one minute) than more shorter ones because of the startup time.
+### Compute units consumption
 
-The average consumption is **1 Compute unit for 1000 actor pages** scraped
+Compute unit consumption was measured on a dataset of 50 US capitals.
+
+When the search was done using `locations` parameter (given as `City, State`), the average compute units consumption was 0.02682.
+
+For the same locations, but given in form of `startUrls`, the average consumption was 0.0152.
+
+And finally, when using `locationIds`, the average consumption was 0.01916.
+
+Keeping in mind that the dataset is small, the conclusion is to prefer `startUrls` or `locationIds` over `locations`, if you need to scrape larger amounts of locations. This is due to the fact that the search for location id is omitted in the first two cases.
 
 ### Extend output function
 
