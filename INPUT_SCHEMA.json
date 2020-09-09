@@ -44,7 +44,7 @@
             "title": "Max items",
             "type": "integer",
             "minimum": 0,
-            "description": "Limit of product items to be scraped. Zero value means no limit.",
+            "description": "Limit the number of locations to be scraped. Zero value means no limit.",
             "prefill": 10,
             "default": 10
         },

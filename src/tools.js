@@ -192,9 +192,7 @@ exports.createHandlePageFunction = ({ extendOutputFunction, timeFrame }) => {
             }
 
             // Save all data
-            for (let i = 0; i < results.length; i++) {
-                await Apify.pushData(results[i]);
-            }
+            await Apify.pushData(results);
         } catch (e) {
             // Die in case of unresolved exception
             log.error(
