@@ -116,7 +116,7 @@ This example will add a new field `title`, change the `temperature` field and re
 }
 ```
 
-Note that all the data are scraped from ten day page (eg. `https://weather.com/weather/tenday/l/81cbe8a06fd80171651aef7a414bce1e599aa05082d82f4e319f94b4b60602e0`).
+Note that all the data are scraped from today page (eg. `https://weather.com/weather/today/l/81cbe8a06fd80171651aef7a414bce1e599aa05082d82f4e319f94b4b60602e0`).
 
 ### Epilogue
 Thank you for trying my actor. I will be very glad for a feedback that you can send to my email `josef@apify.com`. If you find any bug, please create an issue on the [Github page](https://github.com/valekjo/actor-weather-scraper/issues).

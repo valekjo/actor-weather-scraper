@@ -1,5 +1,4 @@
 const Apify = require('apify');
-const _ = require('lodash');
 const helpers = require('./helpers');
 const constants = require('./constants');
 const page = require('./page');
@@ -10,7 +9,7 @@ const {
 
 /**
  *
- * All needed data are available from ten day page.
+ * All needed data are available from today page.
  *
  * @param {object} place
  * @param {string} timeFrame
@@ -18,7 +17,7 @@ const {
  * @return {Apify.RequestOptions}
  */
 function createRequestOptions(place, locale) {
-    const url = `https://weather.com/${locale}/weather/tenday/l/${place.placeId}`;
+    const url = `https://weather.com/${locale}/weather/today/l/${place.placeId}`;
     return {
         url,
         userData: {

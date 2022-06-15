@@ -27,6 +27,7 @@
             "description": "Select time frame",
             "editor": "select",
             "default": "today",
+            "prefill": "today",
             "enum": ["today", "hour_by_hour", "ten_day", "weekend", "month"],
             "enumTitles": ["Today", "Hourly", "10 Day", "Weekend", "Month"]
         },
